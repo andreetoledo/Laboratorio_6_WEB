@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Memoria Minecraft</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+   
+</head>
+
+<body>
+    <div id="root"></div>
+  
+    <script type="text/babel">
+    
+      let guessedCards = [];
+      let selectedCards = [];
+    
+      class ClickCounter extends React.Component
+      {
+        constructor(props)
+        {
+          super(props)
+        }
+        
+        render()
+        {
+          return(
+            <div>
+              <h3 style={{textAlign: 'center'}}>MOVIMIENTOS REALIZADOS: {this.props.clicks}</h3>
+            </div>
+          )
+        }
+      }
+   //clase de cartas, utilizando react
+      class Card extends React.Component {
+
+        constructor(props) {
+          super(props)
+          this.state = {
+            side: "back",
+            style: {},
+          }
+          
+          console.log(this.props.card);
+        }
+        
+        clicked(card){
+        
+          if (selectedCards.length <= 1)
+          {
+            selectedCards.push(card);
+            
+            if (!this.props.card.guessed)
+            {
+              this.setState({
+                side: "front" 
+              })
+
+              this.props.click(card);
+            }
+            
+            if (selectedCards.length == 2)
+            {
+              setTimeout(() => {
+                if(!this.props.card.guessed)
+                {
+                  selectedCards[0].setState({
+                    side: "back"
+                  })
+                  selectedCards[1].setState({
+                    side: "back"
+                  })
+
+                }
+                selectedCards = [];
+              }, 2000);
+            }
+
+          }
+
+        }
+//inicia render
+        render() {
+ //cartas sin voltear
+          if (this.state.side == "back")
+          {
+            this.state.style ={
+              background: 'linear-gradient(312deg, rgba(114, 255, 51,1) 35%, rgba(240, 51, 255,1) 100%',
+              width: '100px',
+              height: '140px',
+              margin: '15px',
+              display: 'flex',
+              alignSelf: 'center',
+              alignItems: 'center',
+              justifyContent: 'center',
+              justifySelf: 'center',
+              borderRadius: '15px',
+              fontSize: '50px',
+              lineHeight: '120px',
+              cursor: 'pointer',
+              color: 'white',
+              content: "",
+              transition: 'transform 0.1s',
+              transform: 'rotateY(0deg)',
+              boxShadow: '10px 10px 5px 0px rgba(0,0,0,0.25)',
+            }
+          }
+          else
+          {
+//obtiene las imagenes de las cartas(aveces tarda un poco por el peso de las imagenes)
+            let urlImagen = "url(https://github.com/andreetoledo/Laboratorio_6_WEB/tree/master/Images" + this.props.card.id + ".png?raw=true)";
+//Estilos de las cartas giradas
+            this.state.style ={
+              content: urlImagen,
+              background: 'linear-gradient(312deg, rgba(250, 128, 114,1) 35%, rgba(0,212,255,1) 100%',
+              width: '100px',
+              height: '140px',
+              margin: '15px',
+              display: 'flex',
+              alignSelf: 'center',
+              alignItems: 'center',
+              justifyContent: 'center',
+              justifySelf: 'center',
+              border: 'solid 2px red',
+              borderRadius: '15px',
+              fontSize: '50px',
+              lineHeight: '120px',
+              cursor: 'pointer',
+              color: 'red',
+              transition: 'transform 0.1s',
+              transform: 'rotateY(180deg)',
+              boxShadow: '-10px 10px 5px 0px rgba(0,0,0,0.25)',
+            }
+          }
+
+          return (
+            <div style={this.state.style} onClick={() => this.clicked(this)}>
+             👨🏻‍💻
+            </div>
+          )
+        }
+      }
+//componente de react
+      class Game extends React.Component {
+          constructor(props) {
+            super(props)
+
+            this.state = {
+              cards: [],
+              selectedCards: [],
+              clicks: 0,
+            }
+            
+            this.start();
+          }
+          
+          shuffle(array) 
+          {
+            let currentIndex = array.length;
+            let valorTemporal;
+            let randomIndex;
+            while (0 !== currentIndex) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+                valorTemporal = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = valorTemporal;
+              }
+              return array;
+          }
+          
+          handleClick(carta)
+          {
+          
+            if (!carta.guessed && this.state.selectedCards.length <= 1)
+            {
+              this.state.selectedCards.push(carta);
+
+              if (this.state.selectedCards.length == 2) this.verify();
+            }            
+          }
+          
+          //Verifica si las cartas son iguales
+          verify()
+          {
+          
+            this.setState({
+                clicks: this.state.clicks + 1
+              })
+          
+            let card1 = this.state.selectedCards[0];
+            let card2 = this.state.selectedCards[1];
+            
+            if (card1.id == card2.id && card1.index != card2.index)
+            {
+              guessedCards.push(card1,card2);
+              card1.guessed = true;
+              card2.guessed = true;
+              selectedCards = [];
+              console.log(guessedCards);
+            }
+            //Alerta de juego terminado
+            this.state.selectedCards = [];
+            if (guessedCards.length == 16)
+            {
+              setTimeout(() => {
+                alert("¡¡GANASTE, TERMINA EL JUEGO!!");
+              }, 500)
+            }
+          }
+         
+          start()
+          {
+            const mobs = ['mario', 'duck', 'dog', 'honguito', 'kirby', 'kirbyfantasma', 'fantasma', 'supermario'];
+            
+            let id = 0;
+            let index = 0;
+            mobs.forEach(card => {
+              let carta = {
+                id: id,
+                name: card,
+                guessed: false,
+                index: index,
+                clicked: false,
+              }
+              
+              let cartaClone = {
+                id: id,
+                name: card,
+                guessed: false,
+                index: index + 1,
+                clicked: false,
+              }
+                           
+              id++;
+              index += 2;
+              
+              this.state.cards.push(carta, cartaClone);
+            });
+            
+            this.state.cards = this.shuffle(this.state.cards);
+          }
+          
+
+          render(){
+            const style = {
+              width: '600px',
+              height: '700px',
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: '25% 25% 25% 25%',
+              gridTemplateRows: '25% 25% 25% 25%'
+            }
+            
+            const flexStyle = {
+              display: 'flex',
+              justifyContent: 'center',
+            }
+            
+            let urlBg = "url(https://github.com/andreetoledo/Laboratorio_6_WEB/blob/master/cartas/Bin/Imagenes/background.jpg?raw=true)";
+            const bg = {
+              background: (urlBg),
+              zIndex: '0',
+              padding: '50px',
+            }
+            
+            let urlMemoria = "url(https://github.com/andreetoledo/Laboratorio_6_WEB/blob/master/cartas/Bin/Imagenes/Identificacion.png?raw=true)";
+            let memoriaStyle = {
+              content: urlMemoria,
+            }
+
+          return(
+            <div style={bg}>
+              <div style={flexStyle}>
+                <div style={memoriaStyle}></div>
+              </div>
+              <ClickCounter clicks={this.state.clicks}/>
+              <div style={flexStyle}>
+                <div style={style}>
+                  <Card key="1" card={this.state.cards[0]} click={() => {this.handleClick(this.state.cards[0])}}  />
+                  <Card key="2" card={this.state.cards[1]} click={() => {this.handleClick(this.state.cards[1])}}  />
+                  <Card key="3" card={this.state.cards[2]} click={() => {this.handleClick(this.state.cards[2])}}  />
+                  <Card key="4" card={this.state.cards[3]} click={() => {this.handleClick(this.state.cards[3])}}  />
+                  <Card key="5" card={this.state.cards[4]} click={() => {this.handleClick(this.state.cards[4])}}  />
+                  <Card key="6" card={this.state.cards[5]} click={() => {this.handleClick(this.state.cards[5])}}  />
+                  <Card key="7" card={this.state.cards[6]} click={() => {this.handleClick(this.state.cards[6])}}  />
+                  <Card key="8" card={this.state.cards[7]} click={() => {this.handleClick(this.state.cards[7])}}  />
+                  <Card key="9" card={this.state.cards[8]} click={() => {this.handleClick(this.state.cards[8])}}  />
+                  <Card key="10" card={this.state.cards[9]} click={() => {this.handleClick(this.state.cards[9])}} />
+                  <Card key="11" card={this.state.cards[10]} click={() => {this.handleClick(this.state.cards[10])}} />
+                  <Card key="12" card={this.state.cards[11]} click={() => {this.handleClick(this.state.cards[11])}} />
+                  <Card key="13" card={this.state.cards[12]} click={() => {this.handleClick(this.state.cards[12])}} />
+                  <Card key="14" card={this.state.cards[13]} click={() => {this.handleClick(this.state.cards[13])}} />
+                  <Card key="15" card={this.state.cards[14]} click={() => {this.handleClick(this.state.cards[14])}} />
+                  <Card key="16" card={this.state.cards[15]} click={() => {this.handleClick(this.state.cards[15])}} />
+
+                </div>
+              </div>
+            </div>
+            
+          ) 
+        }
+      }
+
+      ReactDOM.render(
+        <div>
+          <Game />
+        </div>,
+        document.getElementById('root') 
+      )
+
+    </script>
+</body>
+
+</html>
