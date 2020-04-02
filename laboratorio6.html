@@ -45,7 +45,7 @@
           
           console.log(this.props.card);
         }
-        
+        //movimiento de cartas al hacer click
         clicked(card){
         
           if (selectedCards.length <= 1)
@@ -110,7 +110,7 @@
           else
           {
 //obtiene las imagenes de las cartas(aveces tarda un poco por el peso de las imagenes)
-            let urlImagen = "url(https://github.com/andreetoledo/Laboratorio_6_WEB/tree/master/Images" + this.props.card.id + ".png?raw=true)";
+            let urlImagen = "url(http://quetzaluno.space/18439/" + this.props.card.id + ".png)";
 //Estilos de las cartas giradas
             this.state.style ={
               content: urlImagen,
